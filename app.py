@@ -30,6 +30,35 @@ Base.prepare(engine, reflect = True)
 Station = Base.classes.station
 Measurement = Base.classes.measurement
 
+# This function, called `start_temps` accepts a start date in the format '%Y-%m-%d' 
+# and returns the max, min, and average temperatures for all dates in the Measurement
+# table since the start date.
+def start_temps(start_date):
+    """
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d   
+    Returns:
+        TMAX, TMIN, and TAVG
+    """
+    return session.query(func.max(Measurement.tobs), func.min(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).all()
+    
+# This function, called `start_end_temps` accepts start and end dates in the format '%Y-%m-%d' 
+# and returns the max, min, and average temperatures for all observations in the Measurement
+# table that fall within the date range.
+def start_end_temps(start_date, end_date):
+    """
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMAX, TMIN, and TAVG
+    """
+    return session.query(func.max(Measurement.tobs), func.min(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
+
 # Create app.
 app = Flask(__name__)
 
@@ -46,12 +75,11 @@ def home():
     active weather station in json format:<br>\
     http://localhost:5000//api/v1.0/tobs<br><br>\
     The Start endpoint returns the max, min, and average temperature for all days since an input\
-    start date in json format:<br>\
-    http://localhost:5000//api/v1.0/{start}<br><br>\
+    start date (YYYY-MM-DD) in json format:<br>\
+    http://localhost:5000//api/v1.0/?start=2017-07-10<br><br>\
     The Start-End endpoint returns the max, min, and average temperature for all days between and\
-    including input start and end dates in json format:<br>\
-    http://localhost:5000//api/v1.0/{start}{end}"
-
+    including input start and end dates (YYYY-MM-DD) in json format:<br>\
+    http://localhost:5000//api/v1.0/?start=2017-01-01&end=2017-02-01"
 
 # When user hits the Precipitation route, query the hawaii.sqlite database and return the prcp column.
 @app.route("/api/v1.0/precipitation")
@@ -79,27 +107,56 @@ def precipitation():
     # Convert dictionary to json and return to caller.
     return jsonify(prcp_list)
 
-# When user hits the Stations route, return a list of stations in json format.
+# When user hits the stations route, return a list of stations in json format.
 @app.route("/api/v1.0/stations")
 def stations():
     # Query list of stations from Station table
     result = session.query(Station.station).all()
     normal_list = list(np.ravel(result))
     return jsonify(normal_list)   
-"""
-# When user hits the TOBS route,
+
+# When user hits the temperature route, return one year of temperature observations from
+# station with the most observations in json format.
 @app.route("/api/v1.0/tobs")
-def about():
-    return jsonify()
+def temperature():
+    # Compute date one year before last date present in database.
+    # Query last date in database.
+    last_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    # Index into last_date.
+    last_date_string = last_date[0]
+    # Format string as datetime object.
+    format_str = '%Y-%m-%d'
+    datetime_obj = dt.datetime.strptime(last_date_string, format_str)
+    # Subtract 365 years from datetime object.
+    year_ago = datetime_obj - dt.timedelta(days = 365)
+    # Find the station with the most measurements by grouping the Measurement table by station, 
+    # aggregating to count, and sorting descending. This station should provide the most reliable
+    # information about Hawaii weather.
+    # Query
+    result = session.query(Measurement.station, func.count(Measurement.station)).\
+    group_by(Measurement.station).order_by(func.count(Measurement.station).desc()).all()
+    # Extract first cell of first row.
+    highest_number = result[0][0]
+    # For the station with the most observations, query the last year of temperature data.
+    results = session.query(Measurement.tobs).filter(Measurement.station == highest_number).\
+    filter(Measurement.date >= year_ago).all()
+    normal_list = list(np.ravel(results))
+    return jsonify(normal_list)
 
-# When user hits the Start route,
-@app.route("/api/v1.0/{start}")
-def about():
+# When user hits the Start route, 
+@app.route("/api/v1.0/")
+def start():
+    # Call start_temps function with
+    stats = start_temps(start_date)
+    # Convert session.query object into a dictionary.
+    normal_list = list(np.ravel(stats))
     return jsonify()
-
+"""
 # When user hits the Start-End route,
-@app.route("/api/v1.0/{start}{end}")
-def about():
+@app.route("/api/v1.0/")
+def start_end():
+
+    normal_list = list(np.ravel(results))
     return jsonify() """
 
 if __name__ == "__main__":
