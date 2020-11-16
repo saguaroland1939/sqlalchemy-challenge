@@ -1,57 +1,57 @@
 # This app 
 
 # Import dependencies
-from flask import Flask
-from flask import jsonify
+import numpy as np
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine, func
+from flask import Flask, jsonify
 
 # Create app.
 app = Flask(__name__)
 
-# When user hits index route, print all routes.
+# When user hits index route, print endpoint instructions.
 @app.route("/")
 def home():
-    print("Welcome to the Hawaii Weather Research API!")
-    print("")
-    print("Check out the documentation for each endpoint:")
-    print("")
-    print("The Precipitation endpoint returns a JSON")
-    print("/api/v1.0/precipitation")
-    print("/api/v1.0/stations")
-    print("/api/v1.0/tobs")
-    print("/api/v1.0/<start>")
-    print("/api/v1.0/<start>/<end>")
-    return "Welcome to my 'Home' page!"
+    return "Welcome to the Hawaii Vacation Prep API!<br><br>\
+    Endpoint documentation:<br><br>\
+    The Precipitation endpoint returns one year of daily precipitation data in json format:<br>\
+    /api/v1.0/precipitation<br><br>\
+    The Stations endpoint returns a list of weather stations in Hawaii in json format:<br>\
+    /api/v1.0/stations<br><br>\
+    The TOBS endpoint returns one year of temperature observations in Fahrenheit from the most active weather station in json format:<br>\
+    /api/v1.0/tobs<br><br>\
+    The Start endpoint returns the max, min, and average temperature for all days since an input start date in json format:<br>\
+    /api/v1.0/{start}<br><br>\
+    The Start-End endpoint returns the max, min, and average temperature for all days between and including input start and end dates in json format:<br>\
+    /api/v1.0/{start}{end}"
 
-
-# When user hits ___ route,
+"""
+# When user hits /api/v1.0/precipitation route,
 @app.route("/about")
 def about():
-    print("Server received request for 'About' page...")
-    return "Welcome to my 'About' page!"
+    return jsonify()
 
-# When user hits ___ route,
+# When user hits /api/v1.0/stations route,
 @app.route("/about")
 def about():
-    print("Server received request for 'About' page...")
-    return "Welcome to my 'About' page!"
+    return jsonify()   
 
-# When user hits ___ route,
+# When user hits /api/v1.0/tobs route,
 @app.route("/about")
 def about():
-    print("Server received request for 'About' page...")
-    return "Welcome to my 'About' page!"
+    return jsonify()
 
-# When user hits ___ route,
+# When user hits /api/v1.0/{start} route,
 @app.route("/about")
 def about():
-    print("Server received request for 'About' page...")
-    return "Welcome to my 'About' page!"
+    return jsonify()
 
-# When user hits ___ route,
+# When user hits /api/v1.0/{start}{end} route,
 @app.route("/about")
 def about():
-    print("Server received request for 'About' page...")
-    return "Welcome to my 'About' page!"
+    return jsonify() """
 
 if __name__ == "__main__":
     app.run(debug=True)
