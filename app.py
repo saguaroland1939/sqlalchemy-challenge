@@ -17,10 +17,6 @@ from flask import Flask, jsonify, request
 
 # Create db engine for sqlite db.
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
-# Create inspector object to view tables and columns in sqlite db.
-inspector = inspect(engine)
-# Create Pandas connection for temperature analysis.
-conn = engine.connect()
 # Read (reflect) sqlite db into SQLAlchemy Base object.
 Base = automap_base()
 Base.prepare(engine, reflect = True)
@@ -57,8 +53,8 @@ app = Flask(__name__)
 def home():
     return "Welcome to the Hawaii Vacation Prep API!<br><br>\
     Endpoint documentation:<br><br>\
-    The Precipitation endpoint returns one year of daily precipitation data in json format:<br>\
-    http://localhost:5000//api/v1.0/precipitation<br><br>\
+    The Precipitation endpoint returns one year of daily precipitation data in inches in json format:\
+    <br>http://localhost:5000//api/v1.0/precipitation<br><br>\
     The Stations endpoint returns a list of weather stations in Hawaii in json format:<br>\
     http://localhost:5000//api/v1.0/stations<br><br>\
     The TOBS endpoint returns one year of temperature observations in Fahrenheit from the most\
